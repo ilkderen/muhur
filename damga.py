@@ -4,7 +4,7 @@ pyHanko'nun hazır damga stili tüm metne tek renk ve tek yazı tipi uygular.
 Satır satır renk/kalınlık, logo ve ıslak imza istediğimiz için damgayı
 burada kendimiz çizip imzaya hazır görünüm olarak veriyoruz.
 
-Görünüm ~/e-imza/ayarlar.json ile kişiselleştirilir.
+Görünüm ~/Muhur/ayarlar.json ile kişiselleştirilir.
 """
 
 import json
@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pymupdf
 
-EV = Path.home() / "e-imza"
+EV = Path.home() / "Muhur"
 AYAR_DOSYASI = EV / "ayarlar.json"
 LOGO_KLASORU = EV / "logolar"
 

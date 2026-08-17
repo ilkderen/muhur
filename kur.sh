@@ -5,16 +5,16 @@
 #
 # Yaptıkları:
 #   1. Homebrew ve Python 3.13'ü (yoksa) kurar
-#   2. ~/e-imza klasörünü ve yalıtılmış Python ortamını oluşturur
+#   2. ~/Muhur klasörünü ve yalıtılmış Python ortamını oluşturur
 #   3. Finder'a "Mühürle" hızlı eylemini ekler
 #   4. E-imza kartınızı bulup kurulumu doğrular
 #
-# Sisteminizdeki hiçbir şeyi değiştirmez; her şey ~/e-imza içinde kalır.
+# Sisteminizdeki hiçbir şeyi değiştirmez; her şey ~/Muhur içinde kalır.
 
 set -e
 
 KAYNAK="${0:A:h}"
-HEDEF="$HOME/e-imza"
+HEDEF="$HOME/Muhur"
 YESIL='\033[0;32m'; SARI='\033[0;33m'; KIRMIZI='\033[0;31m'; BITIR='\033[0m'
 
 basari() { print "${YESIL}✓${BITIR} $1" }
@@ -75,13 +75,13 @@ cat > "$BETIK" <<'APPLESCRIPT'
 on open theFiles
 	repeat with f in theFiles
 		set p to POSIX path of f
-		do shell script "cd \"$HOME/e-imza\" || exit 1; ./venv/bin/python imzala-gui.py " & quoted form of p & " > /dev/null 2>&1 &"
+		do shell script "cd \"$HOME/Muhur\" || exit 1; ./venv/bin/python imzala-gui.py " & quoted form of p & " > /dev/null 2>&1 &"
 	end repeat
 end open
 
 -- Uygulamaya çift tıklanırsa: ayarlar penceresi.
 on run
-	do shell script "cd \"$HOME/e-imza\" || exit 1; ./venv/bin/python ayarlar-gui.py > /dev/null 2>&1 &"
+	do shell script "cd \"$HOME/Muhur\" || exit 1; ./venv/bin/python ayarlar-gui.py > /dev/null 2>&1 &"
 end run
 APPLESCRIPT
 rm -rf "$UYG"
@@ -121,7 +121,7 @@ basari "Sağ tık menüsüne \"Mühürle\" eklendi"
 baslik "E-imza kartınız aranıyor…"
 if "$HEDEF/venv/bin/python" - <<'PY'
 import sys
-sys.path.insert(0, __import__("os").path.expanduser("~/e-imza"))
+sys.path.insert(0, __import__("os").path.expanduser("~/Muhur"))
 import imza_core
 try:
     lib = imza_core.kutuphane_bul()
@@ -143,7 +143,7 @@ then
 else
 	uyari "Kart okunamadı — kurulum yine de tamamlandı."
 	print "\nToken takılı değilse takıp şunu çalıştırın:"
-	print "    ~/e-imza/venv/bin/python ~/e-imza/imzala.py --help"
+	print "    ~/Muhur/venv/bin/python ~/Muhur/imzala.py --help"
 	print "\nSürücü kurulu değilse kart sağlayıcınızın (TÜRKTRUST, E-Güven,"
 	print "Kamu SM, E-Tuğra) macOS sürücüsünü kurmanız gerekir."
 fi

@@ -11,7 +11,7 @@ ICERIK = KOK / "Contents"
 ICERIK.mkdir(parents=True, exist_ok=True)
 
 KOMUT = (
-    'cd "$HOME/e-imza" || exit 1\n'
+    'cd "$HOME/Muhur" || exit 1\n'
     'for f in "$@"; do\n'
     '  ./venv/bin/python imzala-hizli.py "$f"\n'
     'done\n'

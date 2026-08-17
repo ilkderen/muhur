@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pymupdf
 
-sys.path.insert(0, str(Path.home() / "e-imza"))
+sys.path.insert(0, str(Path.home() / "Muhur"))
 import damga  # noqa: E402
 
 AD = "AV. AYŞE YILMAZ"

@@ -37,7 +37,7 @@ Kurulum Homebrew ve Python'u (yoksa) kurar, gerekli kütüphaneleri indirir,
 Finder'a sağ tık seçeneğini ekler, uygulamayı oluşturur ve sonunda kartınızı
 okuyup doğrular.
 
-Her şey `~/e-imza` klasöründe kalır; sisteminizin başka hiçbir yerine
+Her şey `~/Muhur` klasöründe kalır; sisteminizin başka hiçbir yerine
 dokunulmaz.
 
 **Ön koşul:** Kart sürücünüz (AKİS, SafeNet vb.) kurulu olmalı. Mühür sürücüyü
@@ -104,7 +104,7 @@ başka bir e-imza uygulaması açıksa kartı meşgul eder.
 ## Doğrulama
 
 ```bash
-~/e-imza/venv/bin/pyhanko sign validate --pretty-print dilekçe_imzalı.pdf
+~/Muhur/venv/bin/pyhanko sign validate --pretty-print dilekçe_imzalı.pdf
 ```
 
 `The signature is cryptographically sound` ve `The signature covers the entire
@@ -119,7 +119,7 @@ uygulamasındaki dört tuhaflığı telafi ediyor. Farklı bir sağlayıcının 
 çalışmazsa şunu çalıştırıp çıkan raporu paylaşın:
 
 ```bash
-~/e-imza/venv/bin/python ~/e-imza/kart-raporu.py
+~/Muhur/venv/bin/python ~/Muhur/kart-raporu.py
 ```
 
 Rapor PIN sormaz, imza atmaz, karta yazmaz — yalnızca kartın kendini nasıl
@@ -128,7 +128,7 @@ tanıttığını okur ve kişisel alanları maskeler.
 ## Kaldırma
 
 ```bash
-rm -rf ~/e-imza ~/Applications/Mühür.app "$HOME/Library/Services/Mühürle.workflow"
+rm -rf ~/Muhur ~/Applications/Mühür.app "$HOME/Library/Services/Mühürle.workflow"
 ```
 
 ## Teknik

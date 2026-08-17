@@ -2,7 +2,7 @@
 """Damga denemeleri için örnek dilekçe üretir.
 
 Kullanım: ornek-uret.py [dosya.pdf]
-Varsayılan çıktı: ~/e-imza/deneme-dilekce.pdf
+Varsayılan çıktı: ~/Muhur/deneme-dilekce.pdf
 """
 
 import sys
@@ -55,5 +55,5 @@ def uret(hedef, ad="AV. AD SOYAD"):
 
 
 if __name__ == "__main__":
-    hedef = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.home() / "e-imza" / "deneme-dilekce.pdf"
+    hedef = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.home() / "Muhur" / "deneme-dilekce.pdf"
     print("üretildi:", uret(hedef))

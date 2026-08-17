@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pymupdf
 
-KAYNAK_SIMGE = Path.home() / "e-imza" / "logolar" / "stamp.svg"
+KAYNAK_SIMGE = Path.home() / "Muhur" / "logolar" / "stamp.svg"
 ZEMIN = (0.055, 0.078, 0.145)   # gece laciverti
 BOYUTLAR = [(16, 1), (16, 2), (32, 1), (32, 2), (128, 1), (128, 2),
             (256, 1), (256, 2), (512, 1), (512, 2)]
