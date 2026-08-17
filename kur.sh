@@ -101,8 +101,12 @@ for c in \
 	"Add :CFBundleDocumentTypes:0:LSItemContentTypes: string com.adobe.pdf"; do
 	/usr/libexec/PlistBuddy -c "$c" "$P" >/dev/null 2>&1
 done
+# osacompile "on open" bölümü yüzünden uygulamayı droplet olarak üretiyor
+# ve droplet.icns kullanıyor; her ikisini de kendi simgemizle değiştiriyoruz.
 "$HEDEF/venv/bin/python" "$HEDEF/ikon-uret.py" \
 	"$UYG/Contents/Resources/applet.icns" >/dev/null 2>&1 || true
+[[ -f "$UYG/Contents/Resources/applet.icns" ]] && \
+	cp "$UYG/Contents/Resources/applet.icns" "$UYG/Contents/Resources/droplet.icns" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Set :CFBundleIconFile applet" "$P" >/dev/null 2>&1 || \
 	/usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string applet" "$P" >/dev/null 2>&1
 codesign -f -s - "$UYG" >/dev/null 2>&1
