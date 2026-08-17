@@ -1,0 +1,8 @@
+# Kişisel ayarlar ve çıktılar depoya girmez
+ayarlar.json
+*.pdf
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+!ornek/*.pdf
