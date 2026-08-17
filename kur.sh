@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Mühür — kurulum
 #
-# Kullanım: Terminal'de bu klasöre girip  ./kur.sh  yazın.
+# Kullanım: Terminal'de çalıştırın. Tek satırlık kurulum için bkz. README.
 #
 # Yaptıkları:
 #   1. Homebrew ve Python 3.13'ü (yoksa) kurar

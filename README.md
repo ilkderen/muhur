@@ -27,15 +27,27 @@ imzası üretiyor; sonuç Adobe dahil her doğrulayıcıda geçerli görünüyor
 
 ## Kurulum
 
-Terminal'i açın ve indirdiğiniz dosyayı çalıştırın:
+Terminal'i açın (Uygulamalar → İzlenceler → Terminal), şunu yapıştırıp Enter'a
+basın:
 
 ```bash
-chmod +x ~/Downloads/muhur-kur.sh && ~/Downloads/muhur-kur.sh
+curl -fsSL https://raw.githubusercontent.com/ilkderen/muhur/main/muhur-kur.sh -o ~/Downloads/muhur-kur.sh && chmod +x ~/Downloads/muhur-kur.sh && ~/Downloads/muhur-kur.sh
 ```
+
+Hepsi bu. Ayrıca bir şey indirmenize gerek yok; komut kurulum dosyasını kendisi
+alıp çalıştırıyor.
 
 Kurulum Homebrew ve Python'u (yoksa) kurar, gerekli kütüphaneleri indirir,
 Finder'a sağ tık seçeneğini ekler, uygulamayı oluşturur ve sonunda kartınızı
 okuyup doğrular.
+
+Çalıştırmadan önce ne yaptığına bakmak isterseniz — e-imzanızla ilgili bir araç
+olduğu için makul bir istek — dosyayı indirip okuyabilirsiniz:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ilkderen/muhur/main/muhur-kur.sh -o ~/Downloads/muhur-kur.sh
+open -e ~/Downloads/muhur-kur.sh
+```
 
 Her şey `~/Muhur` klasöründe kalır; sisteminizin başka hiçbir yerine
 dokunulmaz.
