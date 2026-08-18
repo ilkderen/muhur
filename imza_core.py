@@ -416,6 +416,75 @@ def onceki_damga_konumu(path):
     return None
 
 
+# İmza bloğunu ele veren tipik ifadeler. Ad bulunamazsa bunlar aranır.
+IMZA_BLOGU_IPUCLARI = [
+    "VEKİLİ", "Vekili", "vekili",
+    "Saygılarımla", "saygılarımla",
+    "arz ederim", "Arz ederim", "arz ve talep", "talep ederiz", "talep ederim",
+    "Av.", "AV.", "Avukat", "AVUKAT",
+]
+
+
+# Ek listesi başlıkları — damga bunların arkasında kalmamalı
+EKLER_BASLIKLARI = ["EKLER", "Ekler", "EKLER:", "Ekler:", "EK-1", "EK :", "EKİ:", "Eki:"]
+
+
+def _metnin_bittigi_yer(path, genislik, yukseklik, kenar=24):
+    """Son sayfada içeriğin bittiği yerin hemen altına konum üretir.
+
+    Boş alan arayıcı sayfayı alttan tarayıp damgayı kâğıdın dibine
+    yapıştırıyordu. Metnin hemen ardı, gözün imza aradığı yer.
+
+    EKLER bölümü varsa içerik onunla bitmiş sayılmaz: damga eklerin
+    arkasında kalmasın diye ek listesinin ÜSTÜ hedeflenir.
+    """
+    import pymupdf
+
+    belge = pymupdf.open(path)
+    try:
+        dizin = len(belge) - 1
+        sayfa = belge[dizin]
+        Y, G = sayfa.rect.height, sayfa.rect.width
+
+        bloklar = [pymupdf.Rect(b[:4]) for b in sayfa.get_text("blocks")]
+        cizimler = [pymupdf.Rect(c["rect"]) for c in sayfa.get_drawings()]
+        dolu = bloklar + cizimler
+        if not dolu:
+            return None
+
+        alt = max(r.y1 for r in dolu)          # içeriğin bittiği çizgi
+
+        # EKLER başlığı varsa, içerik onun başladığı yerde biter say
+        ekler_ust = None
+        for baslik in EKLER_BASLIKLARI:
+            for r in sayfa.search_for(baslik) or []:
+                ekler_ust = r.y0 if ekler_ust is None else min(ekler_ust, r.y0)
+        if ekler_ust is not None:
+            ustundekiler = [r.y1 for r in dolu if r.y1 <= ekler_ust + 2]
+            if ustundekiler:
+                alt = max(ustundekiler)
+        x = G - kenar - genislik               # sağa hizalı
+        for bosluk in (16, 24, 34, 46):
+            aday = pymupdf.Rect(x, alt + bosluk, x + genislik,
+                                alt + bosluk + yukseklik)
+            if aday.y1 > Y - 12:
+                break
+            if not any(aday.intersects(d) for d in dolu):
+                return dizin, (aday.x0, Y - aday.y1, aday.x1, Y - aday.y0)
+    finally:
+        belge.close()
+    return None
+
+
+def _ipucuyla_bul(path, genislik, yukseklik):
+    """İmza bloğu ifadelerinden birini arayıp altına yerleştirir."""
+    for ipucu in IMZA_BLOGU_IPUCLARI:
+        sonuc = imza_blogu_bul(path, ipucu, genislik, yukseklik)
+        if sonuc:
+            return sonuc
+    return None
+
+
 def konum_bul(path, ad=None, onceki_yeri_kullan=False):
     """Damga için en uygun yeri seçer.
 
@@ -447,11 +516,23 @@ def konum_bul(path, ad=None, onceki_yeri_kullan=False):
         except Exception:
             ad = ""
 
+    # 1) Sertifikadaki ad belgede geçiyorsa en doğrusu orası
     if ad:
         sonuc = imza_blogu_bul(path, ad, genislik, yukseklik)
         if sonuc:
             return sonuc
 
+    # 2) Ad geçmiyorsa imza bloğunu ele veren ifadeleri ara
+    sonuc = _ipucuyla_bul(path, genislik, yukseklik)
+    if sonuc:
+        return sonuc
+
+    # 3) O da yoksa metnin bittiği yerin hemen altı
+    sonuc = _metnin_bittigi_yer(path, genislik, yukseklik)
+    if sonuc:
+        return sonuc
+
+    # 4) Son çare: sayfadaki herhangi bir boş alan
     return bos_alan_bul(path, genislik, yukseklik)
 
 
