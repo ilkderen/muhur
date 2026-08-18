@@ -285,6 +285,68 @@ class ImzaPenceresi:
             kim = ", ".join(f"{ad} ({alan})" for alan, ad, _ in imzalar)
             self.durum.configure(text=f"Bu belgede zaten imza var: {kim}")
 
+    def _tekrar_imza_sor(self):
+        """Belge zaten imzalıysa ne yapılacağını sorar.
+
+        (devam_mi, onceki_kaldirilsin_mi) döndürür. Başkasının imzası varsa
+        kaldırma seçeneği hiç sunulmaz — geri almak onun imzasını da siler.
+        """
+        try:
+            onceki = imza_core.mevcut_imzalar(self.pdf_yolu)
+        except Exception:
+            return True, False
+        if not onceki:
+            return True, False
+
+        try:
+            _, hepsi_benim = imza_core.sadece_ben_mi_imzaladim(self.pdf_yolu)
+        except Exception:
+            hepsi_benim = False
+
+        kim = ", ".join(ad for _, ad, _ in onceki)
+
+        if not hepsi_benim:
+            devam = messagebox.askokcancel(
+                "Mühür",
+                f"Bu belgede başkasının imzası var:\n{kim}\n\n"
+                "Önceki imza korunacak, sizinki ikinci imza olarak eklenecek.")
+            return bool(devam), False
+
+        pencere = tk.Toplevel(self.kok)
+        pencere.title("Mühür")
+        pencere.transient(self.kok)
+        pencere.resizable(False, False)
+        pencere.grab_set()
+
+        cerceve = ttk.Frame(pencere, padding=20)
+        cerceve.pack()
+        ttk.Label(cerceve, text="Bu belgede zaten sizin imzanız var.",
+                  font=("Helvetica", 13, "bold")).pack(anchor="w")
+        ttk.Label(cerceve, wraplength=380, justify="left",
+                  text="Önceki imzayı kaldırıp yeniden mi imzalayalım, yoksa "
+                       "ikinci imza olarak mı eklensin?").pack(
+                           anchor="w", pady=(6, 14))
+
+        secim = {"devam": False, "kaldir": False}
+
+        def yeniden():
+            secim.update(devam=True, kaldir=True)
+            pencere.destroy()
+
+        def ekle():
+            secim.update(devam=True, kaldir=False)
+            pencere.destroy()
+
+        dugmeler = ttk.Frame(cerceve)
+        dugmeler.pack(fill="x")
+        ttk.Button(dugmeler, text="Vazgeç", command=pencere.destroy).pack(side="left")
+        ttk.Button(dugmeler, text="İkinci imza ekle", command=ekle).pack(side="right")
+        ttk.Button(dugmeler, text="Yeniden imzala", command=yeniden).pack(
+            side="right", padx=6)
+
+        self.kok.wait_window(pencere)
+        return secim["devam"], secim["kaldir"]
+
     def pin_sor(self):
         pencere = tk.Toplevel(self.kok)
         pencere.title("PIN")
@@ -324,6 +386,11 @@ class ImzaPenceresi:
         if not self.secim_kutu:
             return
         kutu = self.pdf_kutusu()
+
+        devam, kaldir = self._tekrar_imza_sor()
+        if not devam:
+            return
+
         pin = self.pin_sor()
         if not pin:
             return
@@ -334,7 +401,8 @@ class ImzaPenceresi:
 
         try:
             ad, unvan, alan, cikti = imza_core.imzala_yerine(
-                self.pdf_yolu, pin, kutu=kutu, sayfa=self.sayfa_no)
+                self.pdf_yolu, pin, kutu=kutu, sayfa=self.sayfa_no,
+                onceki_imzayi_kaldir=kaldir)
         except Exception as hata:
             self.durum.configure(text="İmzalama başarısız.")
             self.imzala_dugmesi.configure(state="normal")
