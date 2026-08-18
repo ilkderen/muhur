@@ -1416,8 +1416,23 @@ then
 	print "Bir PDF'e sağ tıklayıp \"Mühürle\" seçin."
 else
 	uyari "Kart okunamadı — kurulum yine de tamamlandı."
-	print "\nToken takılı değilse takıp şunu çalıştırın:"
-	print "    ~/Muhur/venv/bin/python ~/Muhur/imzala.py --help"
-	print "\nSürücü kurulu değilse kart sağlayıcınızın (TÜRKTRUST, E-Güven,"
-	print "Kamu SM, E-Tuğra) macOS sürücüsünü kurmanız gerekir."
+	print "\n1) Token bu bilgisayara takılı mı? Takıp şunu çalıştırın:"
+	print "     ~/Muhur/venv/bin/python ~/Muhur/kart-raporu.py"
+	print "\n2) Kart sürücünüz kurulu ve DOĞRU SÜRÜM olmalı."
+	print "   AKİS kartları (TÜRKTRUST, TBB, E-Güven, Kamu SM) için:"
+	print "     https://akiskart.bilgem.tubitak.gov.tr/destek/"
+	print "\n   Sayfada 'Mac OS Arm' ve 'Mac OS Intel' diye iki ayrı bölüm var."
+	if [[ "$(uname -m)" == "arm64" ]]; then
+		print "   Bu Mac Apple Silicon → \033[1mMac OS Arm\033[0m sürümünü indirin."
+		if [[ -f /usr/local/lib/libakisp11.dylib ]]; then
+			MIM=$(lipo -archs /usr/local/lib/libakisp11.dylib 2>/dev/null)
+			if [[ -n "$MIM" && "$MIM" != *arm64* ]]; then
+				print ""
+				uyari "Kurulu sürücünüz Intel sürümü ($MIM) — bu Mac'te çalışmaz."
+				print "   Yukarıdaki adresten Arm sürümünü kurun."
+			fi
+		fi
+	else
+		print "   Bu Mac Intel → \033[1mMac OS Intel\033[0m sürümünü indirin."
+	fi
 fi
