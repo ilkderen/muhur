@@ -493,3 +493,69 @@ def imzala(infile, outfile, pin, kutu=None, sayfa=0):
                 )
 
     return ad, unvan, alan
+
+
+# Kartı meşgul edebilecek bilinen uygulamalar (süreç adı, görünen ad)
+KART_UYGULAMALARI = [
+    ("Akia", "AKİA"),
+    ("UHAPImza", "UHAPImza"),
+    ("Adalet Eimza", "Adalet E-imza"),
+    ("EDevletEImza", "E-Devlet E-İmza"),
+    ("PTTKEPEImza", "PTT KEP E-İmza"),
+    ("AdobeAcrobat", "Adobe Acrobat"),
+    ("ekatip", "e-Katip"),
+    ("UYAP", "UYAP"),
+]
+
+
+def karti_mesgul_edenler():
+    """Şu anda açık olan ve kartı meşgul edebilecek uygulamaların adları."""
+    import subprocess
+
+    try:
+        cikti = subprocess.run(["ps", "-Ao", "comm"], capture_output=True,
+                               text=True, timeout=5).stdout
+    except Exception:
+        return []
+    return [gorunen for surec, gorunen in KART_UYGULAMALARI if surec in cikti]
+
+
+def hata_aciklamasi(hata):
+    """Ham istisnayı kullanıcının anlayacağı bir açıklamaya çevirir.
+
+    (başlık, öneri) döndürür. Öneri yalnızca gerçekten geçerliyse dolu olur —
+    her hatada "başka uygulama açık olabilir" demek yanıltıcı oluyordu.
+    """
+    ad = type(hata).__name__
+    metin = str(hata)
+    dusuk = metin.lower()
+
+    if "pinincorrect" in dusuk or "pin_incorrect" in dusuk:
+        return ("PIN yanlış.",
+                "Kartta sınırlı deneme hakkı vardır; dikkatli girin. "
+                "Hak biterse PUK kodu gerekir.")
+
+    if "pinlocked" in dusuk or "pin_locked" in dusuk:
+        return ("Kart kilitli.",
+                "PIN deneme hakkı tükenmiş. Kart sağlayıcınızın aracıyla "
+                "PUK kodunu kullanarak açmanız gerekiyor.")
+
+    if isinstance(hata, KartYok) or "kart" in dusuk and "bulunamadı" in dusuk:
+        return (metin, "")
+
+    if "mechanism" in dusuk:
+        return ("Kart bu imzalama yöntemini desteklemiyor.",
+                "Kartınız Mühür'ün geliştirildiği karttan farklı olabilir. "
+                "kart-raporu.py çıktısını geliştiriciye iletin.")
+
+    if "could not find private key" in dusuk or "certificate" in dusuk:
+        return ("Kartta imzalama sertifikası bulunamadı.",
+                "kart-raporu.py çıktısını geliştiriciye iletin.")
+
+    acik = karti_mesgul_edenler()
+    if acik:
+        return (f"{ad}: {metin}",
+                "Şu uygulamalar açık ve kartı meşgul ediyor olabilir: "
+                + ", ".join(acik) + ". Kapatıp tekrar deneyin.")
+
+    return (f"{ad}: {metin}", "")

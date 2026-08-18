@@ -119,13 +119,11 @@ def main():
             girdi, pin, kutu=kutu, sayfa=sayfa, onceki_imzayi_kaldir=kaldir
         )
     except Exception as hata:
-        bildir(
-            UYGULAMA,
-            f"İmzalama başarısız.\n\n{type(hata).__name__}: {hata}\n\n"
-            "PIN yanlışsa kartta deneme hakkı azalır. Başka bir e-imza "
-            "uygulaması açıksa kartı meşgul ediyor olabilir.",
-            hata=True,
-        )
+        baslik, oneri = imza_core.hata_aciklamasi(hata)
+        mesaj = f"İmzalanamadı.\n\n{baslik}"
+        if oneri:
+            mesaj += f"\n\n{oneri}"
+        bildir(UYGULAMA, mesaj, hata=True)
         return 1
 
     sonuc = _osascript(

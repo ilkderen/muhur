@@ -338,11 +338,9 @@ class ImzaPenceresi:
         except Exception as hata:
             self.durum.configure(text="İmzalama başarısız.")
             self.imzala_dugmesi.configure(state="normal")
+            baslik, oneri = imza_core.hata_aciklamasi(hata)
             messagebox.showerror(
-                "Mühür",
-                f"{type(hata).__name__}\n\n{hata}\n\n"
-                "PIN yanlışsa kartta deneme hakkı azalır. Başka bir e-imza "
-                "uygulaması açıksa kartı meşgul ediyor olabilir.")
+                "Mühür", baslik + (f"\n\n{oneri}" if oneri else ""))
             return
 
         damga.konumu_hatirla(kutu, self.sayfa_no)
