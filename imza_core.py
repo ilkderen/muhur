@@ -422,6 +422,8 @@ IMZA_BLOGU_IPUCLARI = [
     "Saygılarımla", "saygılarımla",
     "arz ederim", "Arz ederim", "arz ve talep", "talep ederiz", "talep ederim",
     "Av.", "AV.", "Avukat", "AVUKAT",
+    "Bilirkişi", "BİLİRKİŞİ", "bilirkişi",
+    "Uzman", "UZMAN", "Müşavir", "MÜŞAVİR",
 ]
 
 
@@ -485,7 +487,7 @@ def _ipucuyla_bul(path, genislik, yukseklik):
     return None
 
 
-def konum_bul(path, ad=None, onceki_yeri_kullan=False):
+def konum_bul(path, ad=None, unvan=None, onceki_yeri_kullan=False):
     """Damga için en uygun yeri seçer.
 
     Sıra: (1) yeniden imzalıyorsak önceki damganın yeri, (2) ayarlardaki
@@ -507,14 +509,17 @@ def konum_bul(path, ad=None, onceki_yeri_kullan=False):
     if a.get("son_konum") and a.get("son_sayfa") is not None:
         return int(a["son_sayfa"]), tuple(a["son_konum"])
 
-    if ad is None:
+    if ad is None or unvan is None:
         try:
             lib = kutuphane_bul()
             token = token_bul(lib)
             sertifika, _ = imza_sertifikasi_bul(lib, token)
-            ad = sertifika.subject.native.get("common_name", "")
+            konu = sertifika.subject.native
+            ad = ad or konu.get("common_name", "")
+            unvan = unvan or konu.get("title", "")
         except Exception:
-            ad = ""
+            ad = ad or ""
+            unvan = unvan or ""
 
     # 1) Sertifikadaki ad belgede geçiyorsa en doğrusu orası
     if ad:
@@ -522,17 +527,24 @@ def konum_bul(path, ad=None, onceki_yeri_kullan=False):
         if sonuc:
             return sonuc
 
-    # 2) Ad geçmiyorsa imza bloğunu ele veren ifadeleri ara
+    # 2) Sertifikadaki unvan belgede geçiyor olabilir (AVUKAT, BİLİRKİŞİ…)
+    #    Meslek listesi tutmak yerine kullanıcının kendi unvanını arıyoruz.
+    if unvan:
+        sonuc = imza_blogu_bul(path, unvan, genislik, yukseklik)
+        if sonuc:
+            return sonuc
+
+    # 3) Yaygın imza bloğu ifadelerini ara
     sonuc = _ipucuyla_bul(path, genislik, yukseklik)
     if sonuc:
         return sonuc
 
-    # 3) O da yoksa metnin bittiği yerin hemen altı
+    # 4) O da yoksa metnin bittiği yerin hemen altı
     sonuc = _metnin_bittigi_yer(path, genislik, yukseklik)
     if sonuc:
         return sonuc
 
-    # 4) Son çare: sayfadaki herhangi bir boş alan
+    # 5) Son çare: sayfadaki herhangi bir boş alan
     return bos_alan_bul(path, genislik, yukseklik)
 
 
