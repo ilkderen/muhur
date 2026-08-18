@@ -354,6 +354,22 @@ class ImzaPenceresi:
             subprocess.run(["open", "-R", str(cikti)], check=False)
 
 
+def _dock_simgesi(kok):
+    """Dock ve pencere simgesini Mühür'ünkiyle değiştirir.
+
+    Pencereyi Python açtığı için macOS varsayılan olarak Python'un
+    simgesini gösteriyor.
+    """
+    try:
+        yol = damga.uygulama_simgesi_png()
+        if yol:
+            simge = tk.PhotoImage(file=str(yol))
+            kok.iconphoto(True, simge)
+            kok._muhur_simge = simge      # çöp toplayıcı silmesin
+    except Exception:
+        pass
+
+
 def main():
     if len(sys.argv) > 1:
         yol = sys.argv[1]
@@ -367,6 +383,7 @@ def main():
             return 0
 
     kok = tk.Tk()
+    _dock_simgesi(kok)
     try:
         ImzaPenceresi(kok, yol)
     except Exception as hata:

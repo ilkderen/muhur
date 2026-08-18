@@ -28,6 +28,13 @@ print "──────────────"
 # ---------------------------------------------------------------- ön kontrol
 [[ "$(uname)" == "Darwin" ]] || hata "Bu kurulum yalnızca macOS içindir."
 
+# İlk kurulum mu? Ayar dosyası yoksa sonunda ayar penceresini bir kez açacağız.
+if [[ -f "$HEDEF/ayarlar.json" ]]; then
+	ILK_KURULUM=0
+else
+	ILK_KURULUM=1
+fi
+
 baslik "Homebrew kontrol ediliyor…"
 if ! command -v brew >/dev/null 2>&1; then
 	uyari "Homebrew kurulu değil. Kuruluyor (parolanız istenebilir)…"
@@ -140,6 +147,11 @@ then
 	basari "Kart okundu"
 	print "\nKurulum tamamlandı."
 	print "Bir PDF'e sağ tıklayıp \"Mühürle\" seçin."
+	if [[ "$ILK_KURULUM" == "1" ]]; then
+		print "\nDamga görünümünü (logo, renk, ibare dili) şimdi ayarlayın —"
+		print "bir kez yapılır, sonra hiç sorulmaz. Pencere açılıyor…"
+		"$HEDEF/venv/bin/python" "$HEDEF/ayarlar-gui.py" >/dev/null 2>&1 &
+	fi
 else
 	uyari "Kart okunamadı — kurulum yine de tamamlandı."
 	print "\n1) Token bu bilgisayara takılı mı? Takıp şunu çalıştırın:"

@@ -268,3 +268,42 @@ def ciz(hedef_pdf, ad, unvan, tarih, a=None):
     belge.save(str(hedef_pdf), garbage=4, deflate=True, clean=True)
     belge.close()
     return G, Y
+
+
+def uygulama_simgesi_png(boy=512):
+    """Uygulama simgesini PNG olarak üretir (Tk pencere/Dock simgesi için).
+
+    Pencereyi Python açtığı için macOS Dock'ta Python'un simgesini
+    gösteriyor; bunu Tk'ye kendi simgemizi vererek düzeltiyoruz.
+    """
+    import tempfile
+
+    simge = LOGO_KLASORU / "stamp.svg"
+    if not simge.is_file():
+        return None
+    hedef = Path(tempfile.gettempdir()) / f"muhur-dock-{boy}.png"
+    if hedef.exists():
+        return hedef
+    try:
+        ham = simge.read_text(encoding="utf-8").replace("currentColor", "#ffffff")
+        gecici = Path(tempfile.gettempdir()) / "muhur-dock.svg"
+        gecici.write_text(ham, encoding="utf-8")
+        sd = pymupdf.open(str(gecici))
+        pdf = sd.convert_to_pdf()
+        sd.close()
+        (Path(tempfile.gettempdir()) / "muhur-dock.pdf").write_bytes(pdf)
+
+        d = pymupdf.open()
+        sf = d.new_page(width=boy, height=boy)
+        pay = boy * 0.085
+        sf.draw_rect(pymupdf.Rect(pay, pay, boy - pay, boy - pay),
+                     color=None, fill=(0.055, 0.078, 0.145), width=0, radius=0.225)
+        src = pymupdf.open(str(Path(tempfile.gettempdir()) / "muhur-dock.pdf"))
+        ic = boy * 0.30
+        sf.show_pdf_page(pymupdf.Rect(ic, ic, boy - ic, boy - ic), src, 0)
+        src.close()
+        sf.get_pixmap(alpha=True).save(str(hedef))
+        d.close()
+        return hedef
+    except Exception:
+        return None
