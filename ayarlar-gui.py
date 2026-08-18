@@ -107,6 +107,18 @@ class AyarPenceresi:
                    command=self.imza_kaldir).pack(side="left")
         satir += 1
 
+        ttk.Label(sol, text="İbare dili").grid(row=satir, column=0, sticky="w", pady=4)
+        self.diller = [("tr", "Türkçe"), ("en", "İngilizce"),
+                       ("tr+en", "Türkçe + İngilizce")]
+        self.dil_kutu = ttk.Combobox(sol, state="readonly", width=24,
+                                     values=[e for _, e in self.diller])
+        mevcut_dil = [i for i, (d, _) in enumerate(self.diller)
+                      if d == str(self.ayar.get("dil", "tr"))]
+        self.dil_kutu.current(mevcut_dil[0] if mevcut_dil else 0)
+        self.dil_kutu.grid(row=satir, column=1, sticky="w", padx=(8, 0))
+        self.dil_kutu.bind("<<ComboboxSelected>>", lambda e: self.yenile())
+        satir += 1
+
         self.kanun_var = tk.BooleanVar(value=self.ayar["kanun_metni"])
         ttk.Checkbutton(sol, text="5070 sayılı Kanun ibaresi görünsün",
                         variable=self.kanun_var,
@@ -178,6 +190,7 @@ class AyarPenceresi:
         """Arayüzdeki seçimleri ayar sözlüğüne yazar."""
         self.ayar["logo"] = self.logolar[self.logo_kutu.current()][0]
         self.ayar["kanun_metni"] = bool(self.kanun_var.get())
+        self.ayar["dil"] = self.diller[self.dil_kutu.current()][0]
         self.ayar["cerceve"] = bool(self.cerceve_var.get())
         return self.ayar
 

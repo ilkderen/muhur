@@ -21,6 +21,7 @@ VARSAYILAN = {
     "logo": "monogram",
     "islak_imza": "",            # PNG yolu; boş bırakılırsa çizilmez
     "kanun_metni": True,
+    "dil": "tr",                        # "tr" | "en" | "tr+en"
     "kanun_rengi": [0.65, 0.10, 0.10],
     "metin_rengi": [0.20, 0.20, 0.20],
     "monogram_rengi": [0.13, 0.17, 0.30],
@@ -36,8 +37,26 @@ VARSAYILAN = {
 YAZI = "/System/Library/Fonts/Supplemental/Arial.ttf"
 YAZI_KALIN = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
 
-KANUN = ("Bu belge 5070 sayılı Kanun gereğince",
-         "güvenli elektronik imza ile imzalanmıştır.")
+KANUN_TR = ("Bu belge 5070 sayılı Kanun gereğince",
+            "güvenli elektronik imza ile imzalanmıştır.")
+
+# Yabancı taraflı belgeler için. "qualified electronic signature" eIDAS
+# terminolojisiyle aynı; karşı taraf ne olduğunu anlıyor.
+KANUN_EN = ("This document has been signed with a qualified",
+            "electronic signature under Turkish Law No. 5070.")
+
+KANUN = KANUN_TR          # geriye dönük uyumluluk
+
+
+def kanun_satirlari(a=None):
+    """Ayardaki dile göre ibare satırlarını verir."""
+    a = a or ayarlar()
+    dil = str(a.get("dil", "tr")).lower()
+    if dil == "en":
+        return KANUN_EN
+    if dil in ("tr+en", "en+tr", "iki", "both"):
+        return KANUN_TR + KANUN_EN
+    return KANUN_TR
 
 # Ölçüler (punto) — logo/yazı dengesi bu değerlerle kuruldu
 LOGO_BOY = 46
@@ -140,7 +159,7 @@ def _metin_genisligi(ad="", unvan="", tarih="", a=None):
 
     genislikler = []
     if a["kanun_metni"]:
-        genislikler += [duz.text_length(s, P_KANUN) for s in KANUN]
+        genislikler += [duz.text_length(s, P_KANUN) for s in kanun_satirlari(a)]
     if ad:
         genislikler.append(kalin.text_length(ad, P_AD))
     if unvan or tarih:
@@ -159,7 +178,7 @@ def olcu(a=None, ad="", unvan="", tarih=""):
         a,
     )
     G = KENAR * 2 + (0 if a["logo"] == "yok" else LOGO_BOY + BOSLUK) + metin_genislik
-    satir_sayisi = (2 if a["kanun_metni"] else 0) + 2
+    satir_sayisi = (len(kanun_satirlari(a)) if a["kanun_metni"] else 0) + 2
     metin_yuk = satir_sayisi * SATIR + P_AD + 6 + (AD_BOSLUK if a["kanun_metni"] else 0)
     imza = IMZA_YUKSEKLIK + 4 if _logo_yolu(a["islak_imza"]) else 0
     Y = max(LOGO_BOY + 12, metin_yuk + 12) + imza
@@ -224,11 +243,12 @@ def ciz(hedef_pdf, ad, unvan, tarih, a=None):
             pass
 
     # --- metin ---
-    icerik_yuk = ((2 if a["kanun_metni"] else 0) * SATIR + P_AD + SATIR + 6
+    icerik_yuk = ((len(kanun_satirlari(a)) if a["kanun_metni"] else 0) * SATIR
+                  + P_AD + SATIR + 6
                   + (AD_BOSLUK if a["kanun_metni"] else 0))
     y = imza_alani + ((Y - imza_alani) - icerik_yuk) / 2 + P_KANUN
     if a["kanun_metni"]:
-        for satir in KANUN:
+        for satir in kanun_satirlari(a):
             sf.insert_text((x_metin, y), satir, fontname="duz",
                            fontsize=P_KANUN, color=tuple(a["kanun_rengi"]))
             y += SATIR
