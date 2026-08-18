@@ -56,6 +56,17 @@ dokunulmaz.
 kendisi kuramaz — sağlayıcınızın (TÜRKTRUST, E-Güven, Kamu SM, E-Tuğra) macOS
 sürücüsünü önce kurun.
 
+**Apple Silicon kullanıyorsanız sürücünüz güncel olmalı.** Eski AKİS sürümleri
+yalnızca Intel için derlenmişti ve M serisi Mac'lerde yüklenemiyor. Kontrol
+etmek için:
+
+```bash
+lipo -archs /usr/local/lib/libakisp11.dylib
+```
+
+`x86_64 arm64` görmelisiniz. Yalnızca `x86_64` yazıyorsa sürücüyü
+sağlayıcınızdan güncelleyin — Mühür bu durumu tespit edip size söyler.
+
 ## Kullanım
 
 **Sağ tık → Mühürle** — arayüzsüz. PIN sorulur, damga uygun yere yerleşir.

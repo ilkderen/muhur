@@ -44,6 +44,43 @@ class KartYok(RuntimeError):
     """Takılı kart ya da uygun sürücü bulunamadı."""
 
 
+def _surucu_tanisi(yollar):
+    """Sürücü var ama kart okunamıyorsa sebebi anlaşılır biçimde açıklar.
+
+    En sık sebep: sürücünün eski, yalnızca Intel derlenmiş sürümü. Apple
+    Silicon'da çalışan Python böyle bir kütüphaneyi yükleyemiyor.
+    """
+    import platform
+    import subprocess
+
+    arm = platform.machine() == "arm64"
+    for yol in yollar:
+        try:
+            mimari = subprocess.run(["lipo", "-archs", yol], capture_output=True,
+                                    text=True, timeout=5).stdout.split()
+        except Exception:
+            mimari = []
+        if arm and mimari and "arm64" not in mimari:
+            return (
+                "Kart sürücünüz eski: yalnızca Intel sürümü kurulu "
+                f"({' '.join(mimari)}), bu Mac ise Apple Silicon.\n\n"
+                "Sürücünün güncel sürümünü kart sağlayıcınızdan (TÜRKTRUST, "
+                "E-Güven, Kamu SM, E-Tuğra) indirip kurun. Güncel AKİS "
+                "sürümleri hem Intel hem Apple Silicon destekler.\n\n"
+                f"Sürücü: {yol}"
+            )
+
+    return (
+        "E-imza sürücüsü kurulu ama kart okunamadı.\n\n"
+        "Sırayla bakın:\n"
+        "  1. Token bu bilgisayara takılı mı?\n"
+        "  2. Başka bir e-imza uygulaması açık mı (AKİA, UYAP, Adobe)? "
+        "Kart aynı anda tek uygulamaya açılır.\n"
+        "  3. Token'ı çıkarıp yeniden takmayı deneyin.\n\n"
+        "Sürmezse kart-raporu.py çıktısını geliştiriciye iletin."
+    )
+
+
 def kutuphane_bul():
     """Kart takılı olan ilk PKCS#11 sürücüsünün yolunu döndürür."""
     import os
@@ -59,11 +96,7 @@ def kutuphane_bul():
         except Exception:
             continue
     if denenen:
-        raise KartYok(
-            "E-imza sürücüsü bulundu ama kart okunamadı.\n\n"
-            "Token takılı mı? Başka bir e-imza uygulaması açıksa kartı "
-            "meşgul ediyor olabilir (AKİA, UYAP, Adobe...)."
-        )
+        raise KartYok(_surucu_tanisi(denenen))
     raise KartYok(
         "E-imza sürücüsü bulunamadı.\n\n"
         "Kartınızın sürücüsünü (AKİS, SafeNet vb.) kurmanız gerekiyor."
