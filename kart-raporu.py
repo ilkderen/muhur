@@ -73,7 +73,29 @@ def rapor():
         yaz("")
         yaz("Denenen sürücü yolları:")
         for y in imza_core.BILINEN_KUTUPHANELER:
-            yaz(f"   {'VAR' if Path(y).exists() else 'yok'}  {y}")
+            if not Path(y).exists():
+                yaz(f"   yok  {y}")
+                continue
+            # Mimari önemli: arm64 Python yalnızca arm64 dilimi olan bir
+            # kütüphaneyi yükleyebilir. Eski sürücüler çoğu zaman Intel-only.
+            try:
+                mim = subprocess.run(["lipo", "-archs", y], capture_output=True,
+                                     text=True, timeout=5).stdout.strip()
+            except Exception:
+                mim = "?"
+            yaz(f"   VAR  {y}")
+            yaz(f"        mimari : {mim or '?'}")
+            try:
+                kutuphane = pkcs11.lib(y)
+                yaz(f"        yüklendi: {kutuphane.manufacturer_id} / "
+                    f"{kutuphane.library_description}")
+                yuvalar = list(kutuphane.get_slots())
+                dolu = list(kutuphane.get_slots(token_present=True))
+                yaz(f"        yuva sayısı: {len(yuvalar)}  (kart takılı olan: {len(dolu)})")
+                for yv in yuvalar:
+                    yaz(f"          - {yv}")
+            except Exception as e:
+                yaz(f"        YÜKLENEMEDİ: {type(e).__name__}: {e}")
         yaz("")
         yaz("Sürücü VAR ama kart okunamıyorsa sırayla bakın:")
         yaz("  1. Token gerçekten bu bilgisayara takılı mı?")
