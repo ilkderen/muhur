@@ -39,15 +39,46 @@ def rapor():
     yaz(f"Python     : {sys.version.split()[0]}")
     yaz("")
 
+    # --- okuyucu donanımı (kart takılı mı, en temel soru) ---
+    import subprocess
+
+    yaz("DONANIM")
+    yaz("-" * 46)
+    try:
+        usb = subprocess.run(["ioreg", "-p", "IOUSB", "-w0", "-l"],
+                             capture_output=True, text=True, timeout=10).stdout
+        okuyucular = [s.split('"')[-2] for s in usb.splitlines()
+                      if '"USB Product Name"' in s]
+        yaz(f"  USB cihazları     : {', '.join(okuyucular) if okuyucular else 'YOK'}")
+    except Exception as e:
+        yaz(f"  USB okunamadı     : {e}")
+
+    try:
+        sc = subprocess.run(["system_profiler", "SPSmartCardsDataType"],
+                            capture_output=True, text=True, timeout=20).stdout
+        satir = [l.strip() for l in sc.splitlines() if "ATR:" in l]
+        yaz(f"  Akıllı kart       : {'takılı — ' + satir[0][:60] if satir else 'TAKILI DEĞİL'}")
+    except Exception as e:
+        yaz(f"  Kart okunamadı    : {e}")
+
+    acik = imza_core.karti_mesgul_edenler()
+    yaz(f"  Kartı tutabilecek açık uygulamalar: {', '.join(acik) if acik else 'yok'}")
+    yaz("")
+
     # --- sürücü ---
     try:
         lib_yolu = imza_core.kutuphane_bul()
     except Exception as hata:
-        yaz(f"SÜRÜCÜ BULUNAMADI: {hata}")
+        yaz(f"SÜRÜCÜ/KART SORUNU: {hata}")
         yaz("")
-        yaz("Denenen yollar:")
+        yaz("Denenen sürücü yolları:")
         for y in imza_core.BILINEN_KUTUPHANELER:
             yaz(f"   {'VAR' if Path(y).exists() else 'yok'}  {y}")
+        yaz("")
+        yaz("Sürücü VAR ama kart okunamıyorsa sırayla bakın:")
+        yaz("  1. Token gerçekten bu bilgisayara takılı mı?")
+        yaz("  2. Yukarıda 'Akıllı kart: TAKILI DEĞİL' yazıyorsa okuyucu görülmüyor")
+        yaz("  3. Kartı tutan bir uygulama açıksa kapatın")
         return "\n".join(satirlar)
 
     yaz(f"Sürücü     : {lib_yolu}")
