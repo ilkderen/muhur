@@ -40,6 +40,10 @@ BILINEN_KUTUPHANELER = [
 ]
 
 
+# AKİS sürücüsü indirme sayfası (TÜBİTAK BİLGEM)
+AKIS_INDIRME = "https://akiskart.bilgem.tubitak.gov.tr/destek/"
+
+
 class KartYok(RuntimeError):
     """Takılı kart ya da uygun sürücü bulunamadı."""
 
@@ -62,12 +66,13 @@ def _surucu_tanisi(yollar):
             mimari = []
         if arm and mimari and "arm64" not in mimari:
             return (
-                "Kart sürücünüz eski: yalnızca Intel sürümü kurulu "
+                "Kart sürücünüz yanlış sürüm: Intel paketi kurulu "
                 f"({' '.join(mimari)}), bu Mac ise Apple Silicon.\n\n"
-                "Sürücünün güncel sürümünü kart sağlayıcınızdan (TÜRKTRUST, "
-                "E-Güven, Kamu SM, E-Tuğra) indirip kurun. Güncel AKİS "
-                "sürümleri hem Intel hem Apple Silicon destekler.\n\n"
-                f"Sürücü: {yol}"
+                "AKİS sürücüsünü Arm sürümüyle yeniden kurun:\n"
+                f"{AKIS_INDIRME}\n\n"
+                "Sayfada 'Mac OS Arm' ve 'Mac OS Intel' diye iki ayrı bölüm "
+                "var; Apple Silicon Mac'lerde Arm olanı seçilmeli.\n\n"
+                f"Kurulu sürücü: {yol}"
             )
 
     return (

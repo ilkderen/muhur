@@ -52,20 +52,30 @@ open -e ~/Downloads/muhur-kur.sh
 Her şey `~/Muhur` klasöründe kalır; sisteminizin başka hiçbir yerine
 dokunulmaz.
 
-**Ön koşul:** Kart sürücünüz (AKİS, SafeNet vb.) kurulu olmalı. Mühür sürücüyü
-kendisi kuramaz — sağlayıcınızın (TÜRKTRUST, E-Güven, Kamu SM, E-Tuğra) macOS
-sürücüsünü önce kurun.
+**Ön koşul: kart sürücüsü.** Mühür sürücüyü kendisi kuramaz. TÜRKTRUST, TBB,
+E-Güven ve Kamu SM kartlarının çoğu AKİS kartıdır; sürücüsü buradan indirilir:
 
-**Apple Silicon kullanıyorsanız sürücünüz güncel olmalı.** Eski AKİS sürümleri
-yalnızca Intel için derlenmişti ve M serisi Mac'lerde yüklenemiyor. Kontrol
-etmek için:
+**https://akiskart.bilgem.tubitak.gov.tr/destek/**
+
+Sayfada **Mac OS Arm** ve **Mac OS Intel** diye iki ayrı bölüm var. Mac'inizin
+işlemcisine uyanı seçin — yanlış olanı kurarsanız kart hiç okunmaz:
+
+| Mac'iniz | İndireceğiniz |
+|---|---|
+| Apple Silicon (M1, M2, M3, M4…) | **Mac OS Arm** |
+| Intel | **Mac OS Intel** |
+
+İşlemcinizi bilmiyorsanız:  → Bu Mac Hakkında.
+
+Kurulu sürücünüzün doğru olup olmadığını kontrol etmek için:
 
 ```bash
 lipo -archs /usr/local/lib/libakisp11.dylib
 ```
 
-`x86_64 arm64` görmelisiniz. Yalnızca `x86_64` yazıyorsa sürücüyü
-sağlayıcınızdan güncelleyin — Mühür bu durumu tespit edip size söyler.
+Apple Silicon'da `arm64` görmelisiniz. Yalnızca `x86_64` yazıyorsa Intel paketi
+kurulmuş demektir; Arm sürümüyle yeniden kurun. Mühür bu durumu kendiliğinden
+tespit edip size söyler.
 
 ## Kullanım
 
